@@ -85,6 +85,4 @@ La elección de REST se fundamenta en los siguientes aspectos:
 
 ## 7. Estado de la decisión
 
-Esta decisión se presenta como propuesta para revisión y aprobación del grupo.
-
 Los endpoints, el mecanismo de idempotencia y el comportamiento ante errores deberán verificarse durante la implementación y las pruebas del sistema. No se consideran implementados hasta contar con evidencia de su funcionamiento.
