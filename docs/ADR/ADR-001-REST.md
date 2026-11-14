@@ -1,10 +1,5 @@
 # ADR-001: Selección de REST para la comunicación entre el cliente y la API de pedidos
 
-- **Proyecto:** CampusBite
-- **Estado:** Propuesto para aprobación del grupo
-- **Fecha:** 14 de noviembre de 2026
-- **Decisión:** Utilizar REST para la comunicación entre el cliente y la API de pedidos.
-
 ## 1. Contexto
 
 CampusBite es un sistema distribuido para gestionar los pedidos de la cafetería del campus. Los estudiantes podrán realizar pedidos desde una aplicación web o móvil y consultar el estado de sus pedidos.
