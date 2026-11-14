@@ -88,8 +88,6 @@ La elección de Kafka se fundamenta en los siguientes aspectos:
 
 ## 7. Estado de la decisión
 
-Esta decisión se presenta como propuesta para revisión y aprobación del grupo.
-
 Los nombres de eventos, tópicos, grupos de consumidores, políticas de reintento y comportamiento ante fallos deberán definirse y verificarse durante la implementación.
 
 La retención de mensajes de Kafka no garantiza por sí sola que cada evento se procese correctamente una única vez. Los consumidores deberán contemplar la posibilidad de recibir eventos repetidos y gestionar su procesamiento de forma segura.
