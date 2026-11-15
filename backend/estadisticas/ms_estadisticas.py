@@ -63,9 +63,14 @@ def escuchar_pedidos():
                             estadisticas["ventas_totales"] += total
 
                             for item in items:
-                                nombre = item.get("nombre", "Producto desconocido")
-                                cantidad = int(item.get("cantidad", 0))
-                                precio = float(item.get("precio", 0))
+                                if isinstance(item, dict):
+                                    nombre = item.get("nombre", "Producto desconocido")
+                                    cantidad = int(item.get("cantidad", 1))
+                                    precio = float(item.get("precio", 0))
+                                else:
+                                    nombre = str(item)
+                                    cantidad = 1
+                                    precio = 0.0
 
                                 estadisticas["unidades_vendidas"] += cantidad
 
