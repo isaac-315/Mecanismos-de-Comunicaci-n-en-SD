@@ -21,7 +21,7 @@ Comprobar que, ante una falla de red o reintento automático del cliente que env
 ---
 
 ## 4. Procedimiento de Ejecución (Paso a Paso)
-1. **Primera solicitud (Envío original):** Enviar una petición `POST /pedidos` incluyendo en la cabecera `Idempotency-Key: pedido-test-001` y el cuerpo JSON con los productos seleccionados por el estudiante.
+1. **Primera solicitud (Envío original):** Enviar una petición `POST /pedidos` incluyendo en la cabecera `Idempotency-Key: prueba-001` y el cuerpo JSON con los productos seleccionados por el estudiante.
 2. **Simulación de falla / reintento:** Inmediatamente después (simulando un *timeout* en el cliente que provoca un reenvío automático), ejecutar exactamente la misma petición `POST /pedidos` con la misma cabecera `Idempotency-Key: pedido-test-001` y el mismo payload.
 3. **Verificación en consumidores:** Revisar las consolas de `Cocina`, `Caja` y `Facturación` para contar cuántas veces fue recibido el evento `PedidoCreado`.
 4. **Verificación de consulta:** Consultar `GET /pedidos/{id}` utilizando el identificador devuelto en la primera respuesta.
@@ -36,3 +36,20 @@ Comprobar que, ante una falla de red o reintento automático del cliente que env
 * Los microservicios consumidores registran **1 solo pedido** (0% duplicación).
 
 ### Resultado Obtenido
+
+**Prueba de idempotencia:**
+
+Se enviaron dos solicitudes `POST /pedidos` utilizando la misma clave de idempotencia (`prueba-001`) y el mismo contenido JSON.
+
+- **Primera solicitud:** la API respondió con HTTP `201 Created` y generó el pedido `PED-AA0626`.
+- **Segunda solicitud:** la API identificó que la clave ya había sido utilizada y devolvió el pedido existente, sin generar un nuevo identificador. La respuesta indicó que se trataba de una solicitud duplicada (`duplicado: true`).
+
+Se comprobó que ambas solicitudes correspondían al mismo pedido y que no se creó una segunda orden.
+
+**Conclusión:**
+
+La API REST implementa correctamente la idempotencia ante reintentos con la misma clave. Esto evita la creación de pedidos duplicados y permite que el cliente reciba nuevamente la información de la orden original.
+
+### Observación
+
+La prueba verificó el comportamiento de la API ante el reenvío de una solicitud idéntica. No se simuló una interrupción real de red ni un timeout durante la primera petición.

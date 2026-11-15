@@ -35,3 +35,21 @@ Verificar que el desacoplamiento asíncrono mediante Kafka permite que el sistem
 * Al reiniciar `Facturación`, este se conecta a Kafka, lee desde el último *offset* confirmado para su `grupo-facturacion` y procesa automáticamente el pedido que ocurrió mientras estuvo caído.
 
 ### Resultado Obtenido
+- Se detuvo el microservicio de Facturación mediante `Ctrl + C`, mientras Kafka y los demás servicios permanecían activos.
+- Durante la interrupción se creó un nuevo pedido desde la API REST:
+  - **ID:** `PED-D64E82`
+  - **Estudiante:** Isaac
+  - **Producto:** Sandwich
+  - **Total:** $2.50
+- La API respondió exitosamente con el mensaje de creación del pedido (`201 Created`), sin necesitar que Facturación estuviera activo.
+- Posteriormente, se inició nuevamente el microservicio de Facturación.
+- Al conectarse a Kafka, el consumidor recibió y procesó el pedido `PED-D64E82`, que había sido publicado mientras el servicio estaba detenido.
+- No se volvieron a procesar los mensajes anteriores cuyos offsets ya habían sido confirmados por el grupo `grupo-facturacion`.
+
+### Conclusión
+
+La prueba fue satisfactoria. Se comprobó que Kafka permite desacoplar el microservicio de Facturación del proceso de creación de pedidos. La API pudo continuar registrando pedidos durante la interrupción y, al reiniciarse, Facturación recuperó el evento pendiente mediante su grupo de consumidores.
+
+El uso de offsets confirmados permitió continuar el procesamiento desde la posición correspondiente, evitando volver a consumir los mensajes que ya habían sido procesados y confirmados.
+
+Esta prueba demuestra la tolerancia a la caída temporal de un consumidor, aunque no constituye por sí sola una garantía de procesamiento exactamente una vez (*exactly-once*) de los efectos de negocio.
