@@ -1,0 +1,21 @@
+# BITÁCORA DE USO DE INTELIGENCIA ARTIFICIAL – CampusBite
+
+**Herramienta utilizada:** ChatGPT
+
+## Registro de consultas
+
+| Decisión | Propuesta del grupo (antes de la IA) | Prompt utilizado (captura) | Qué sugirió la IA | Qué aceptó o descartó y por qué | Evidencia que lo respalda |
+|---|---|---|---|---|---|
+| **Integrante 1: Implementación de API REST y gestión de pedidos** | Se propuso desarrollar un servicio REST con Flask para permitir que los estudiantes registren pedidos y consulten su estado. También se consideró necesario evitar que un mismo pedido se registre varias veces por reintentos del cliente. | Consulta por verificar: ¿Cómo implementar una API REST con Flask para registrar y consultar pedidos, utilizando una clave de idempotencia para evitar pedidos duplicados? | La IA sugirió utilizar métodos HTTP, separar las rutas para crear y consultar pedidos y utilizar una clave `Idempotency-Key` para identificar solicitudes repetidas. | Se adoptó la estructura de endpoints REST y el uso de la clave de idempotencia. Se realizaron ajustes para adaptarlos a la estructura del backend y a las necesidades del proyecto. | `backend/api/api_pedidos.py`. Endpoints `POST /pedidos` y `GET /pedidos/<id>`. |
+| **Integrante 2: Comunicación entre microservicios mediante Kafka** | Se propuso utilizar Kafka para comunicar los servicios de manera asíncrona, evitando que todos los componentes dependieran de una comunicación directa. Se definieron eventos para representar la creación y finalización de pedidos. | Consulta por verificar: ¿Cómo implementar productores y consumidores de Kafka en Python para comunicar microservicios mediante tópicos y eventos? | La IA explicó el funcionamiento de productores, consumidores, brokers y tópicos. También orientó sobre cómo utilizar eventos para informar a otros servicios cuando se crea o se termina un pedido. | Se adoptó la comunicación mediante eventos y la utilización de los tópicos `pedido-creado` y `pedido-listo`. Las recomendaciones se adaptaron a la configuración de Kafka mediante Docker y a los servicios desarrollados en Python. | Configuración de Kafka en `backend/docker-compose.yml`, tópico `pedido-creado`, tópico `pedido-listo` y código de los productores y consumidores. |
+| **Integrante 3: Frontend e integración de servicios** | Se planteó desarrollar las interfaces de estudiante, cocina y administrador utilizando Angular, conectándolas con los servicios REST del backend. También se consideró necesario recibir notificaciones cuando un pedido cambiara de estado. | Consultas sobre integración de Angular con servicios REST y WebSockets, actualización de pedidos en los paneles y recepción de notificaciones en tiempo real. | La IA proporcionó ejemplos de código y orientaciones para conectar Angular con Flask, consumir los endpoints REST, establecer conexiones WebSocket y actualizar la información de las interfaces. | Se utilizaron las recomendaciones que se adaptaban a la estructura del proyecto. Se implementaron ajustes para consultar los pedidos, actualizar el panel de cocina y recibir notificaciones. También se realizaron pruebas para verificar la integración. | Código del frontend Angular, servicios de comunicación REST y WebSocket, páginas de estudiante, cocina y administrador. |
+
+## Reflexión sobre el uso de IA
+
+La inteligencia artificial fue utilizada como herramienta de apoyo durante el desarrollo de CampusBite para comprender conceptos, resolver errores y obtener orientaciones sobre la implementación de los mecanismos de comunicación y la integración de los servicios.
+
+Las sugerencias proporcionadas por ChatGPT no se aplicaron automáticamente. El equipo revisó las respuestas, realizó modificaciones cuando fue necesario y efectuó pruebas para comprobar que las soluciones funcionaran en el entorno del proyecto.
+
+Se identificó que algunas respuestas requerían ajustes para adaptarse a las tecnologías, estructura y necesidades de CampusBite. Por ejemplo, fue necesario adaptar las recomendaciones de comunicación a los servicios desarrollados con Flask, Kafka y Angular.
+
+Por ello, la IA fue utilizada como apoyo al aprendizaje y al desarrollo, sin reemplazar el análisis, las decisiones ni el trabajo de los integrantes.
