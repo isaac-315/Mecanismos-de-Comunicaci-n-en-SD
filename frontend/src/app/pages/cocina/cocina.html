@@ -18,14 +18,6 @@
   <div class="stats-grid">
 
     <div class="stat-card">
-      <div class="stat-icon pending-icon">!</div>
-      <div>
-        <p>Pendientes</p>
-        <h2>{{ pendientes }}</h2>
-      </div>
-    </div>
-
-    <div class="stat-card">
       <div class="stat-icon preparing-icon">◷</div>
       <div>
         <p>En preparación</p>
@@ -55,12 +47,6 @@
         [class.active]="filtroActual === 'TODOS'"
         (click)="cambiarFiltro('TODOS')">
         Todos
-      </button>
-
-      <button
-        [class.active]="filtroActual === 'PENDIENTE'"
-        (click)="cambiarFiltro('PENDIENTE')">
-        Pendientes
       </button>
 
       <button
@@ -139,3 +125,4 @@
   </div>
 
 </section>
+

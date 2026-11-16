@@ -1,6 +1,5 @@
 
-
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CocinaService, Pedido } from '../../services/cocina.service';
 
@@ -11,10 +10,12 @@ import { CocinaService, Pedido } from '../../services/cocina.service';
   templateUrl: './cocina.html',
   styleUrl: './cocina.css'
 })
-export class Cocina implements OnInit {
+export class Cocina implements OnInit, OnDestroy {
 
   private cocinaService = inject(CocinaService);
   private cdr = inject(ChangeDetectorRef);
+
+  private intervalo: ReturnType<typeof setInterval> | undefined;
 
   filtroActual = 'TODOS';
   pedidos: Pedido[] = [];
@@ -23,6 +24,17 @@ export class Cocina implements OnInit {
 
   ngOnInit(): void {
     this.cargarPedidos();
+
+    // Actualizar pedidos automáticamente cada 5 segundos
+    this.intervalo = setInterval(() => {
+      this.cargarPedidos();
+    }, 5000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.intervalo) {
+      clearInterval(this.intervalo);
+    }
   }
 
   cargarPedidos(): void {
@@ -55,12 +67,6 @@ export class Cocina implements OnInit {
     );
   }
 
-  get pendientes(): number {
-    return this.pedidos.filter(
-      pedido => pedido.estado === 'PENDIENTE'
-    ).length;
-  }
-
   get enPreparacion(): number {
     return this.pedidos.filter(
       pedido => pedido.estado === 'EN_PREPARACION'
@@ -91,5 +97,4 @@ export class Cocina implements OnInit {
     });
   }
 }
-
 

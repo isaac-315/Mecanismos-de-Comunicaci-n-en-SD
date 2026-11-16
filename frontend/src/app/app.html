@@ -13,18 +13,27 @@
     <div class="menu-label">MENÚ PRINCIPAL</div>
 
     <nav>
+      <!-- Estudiante permanece en la pestaña actual -->
       <a routerLink="/estudiante" routerLinkActive="active">
         <span>🛒</span> Estudiante
       </a>
 
-      <a routerLink="/cocina" routerLinkActive="active">
+      <!-- Cocina se abre en una pestaña nueva -->
+      <a routerLink="/cocina"
+        routerLinkActive="active"
+        target="_blank"
+        rel="noopener noreferrer">
         <span>👨‍🍳</span> Cocina
       </a>
 
-      <a routerLink="/admin" routerLinkActive="active">
+      <!-- Administrador se abre en una pestaña nueva -->
+      <a routerLink="/admin"
+        routerLinkActive="active"
+        target="_blank"
+        rel="noopener noreferrer">
         <span>📊</span> Administrador
       </a>
-    </nav>
+</nav>
 
     <div class="sidebar-footer">
       <span class="status-dot"></span>
