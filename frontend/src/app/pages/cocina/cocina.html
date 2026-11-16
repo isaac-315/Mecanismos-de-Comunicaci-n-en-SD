@@ -1,1 +1,141 @@
-<p>cocina works!</p>
+
+<section class="cocina-container">
+
+  <div class="page-header">
+    <div>
+      <span class="section-label">CAMPUSBITE / COCINA</span>
+      <h1>Panel de cocina</h1>
+      <p>Gestiona y prepara los pedidos de los estudiantes.</p>
+    </div>
+
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      Cocina activa
+    </div>
+  </div>
+
+  <!-- Resumen de pedidos -->
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon pending-icon">!</div>
+      <div>
+        <p>Pendientes</p>
+        <h2>{{ pendientes }}</h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon preparing-icon">◷</div>
+      <div>
+        <p>En preparación</p>
+        <h2>{{ enPreparacion }}</h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon ready-icon">✓</div>
+      <div>
+        <p>Listos</p>
+        <h2>{{ listos }}</h2>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Filtros -->
+  <div class="orders-header">
+    <div>
+      <h2>Pedidos recibidos</h2>
+      <p>Selecciona un pedido para actualizar su estado.</p>
+    </div>
+
+    <div class="filters">
+      <button
+        [class.active]="filtroActual === 'TODOS'"
+        (click)="cambiarFiltro('TODOS')">
+        Todos
+      </button>
+
+      <button
+        [class.active]="filtroActual === 'PENDIENTE'"
+        (click)="cambiarFiltro('PENDIENTE')">
+        Pendientes
+      </button>
+
+      <button
+        [class.active]="filtroActual === 'EN_PREPARACION'"
+        (click)="cambiarFiltro('EN_PREPARACION')">
+        En preparación
+      </button>
+
+      <button
+        [class.active]="filtroActual === 'LISTO'"
+        (click)="cambiarFiltro('LISTO')">
+        Listos
+      </button>
+    </div>
+  </div>
+
+  <!-- Tarjetas de pedidos -->
+  <div class="orders-grid">
+
+    <article class="order-card" *ngFor="let pedido of pedidosFiltrados">
+
+      <div class="order-top">
+        <div>
+          <span class="order-number">{{ pedido.id }}</span>
+          <h3>{{ pedido.estudiante }}</h3>
+        </div>
+
+        <span
+          class="order-status"
+          [ngClass]="{
+            'status-pending': pedido.estado === 'PENDIENTE',
+            'status-preparing': pedido.estado === 'EN_PREPARACION',
+            'status-ready': pedido.estado === 'LISTO'
+          }">
+          {{ pedido.estado === 'EN_PREPARACION' ? 'EN PREPARACIÓN' : pedido.estado }}
+        </span>
+      </div>
+
+      <div class="order-items">
+        <h4>Detalle del pedido</h4>
+
+        <div class="item-row" *ngFor="let item of pedido.items">
+          <span>{{ item.nombre }}</span>
+          <strong>x{{ item.cantidad }}</strong>
+        </div>
+      </div>
+
+      <div class="order-total">
+        <span>Total del pedido</span>
+        <strong>${{ pedido.total.toFixed(2) }}</strong>
+      </div>
+
+      <div class="order-actions">
+
+        <button
+          *ngIf="pedido.estado === 'EN_PREPARACION'"
+          class="btn-ready"
+          (click)="marcarComoListo(pedido)">
+          ✓ Marcar como listo
+        </button>
+
+        <div *ngIf="pedido.estado === 'LISTO'" class="ready-message">
+          ✓ Pedido preparado
+        </div>
+
+      </div>
+
+    </article>
+
+  </div>
+
+  <div class="empty-state" *ngIf="pedidosFiltrados.length === 0">
+    <span>☕</span>
+    <h3>No hay pedidos en esta categoría</h3>
+    <p>Cuando lleguen nuevos pedidos aparecerán aquí.</p>
+  </div>
+
+</section>

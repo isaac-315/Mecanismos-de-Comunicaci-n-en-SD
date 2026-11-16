@@ -1,3 +1,4 @@
+
 import asyncio
 import json
 import threading
@@ -14,21 +15,56 @@ GRUPO_NOTIFICACIONES = "grupo-notificaciones"
 HOST = "0.0.0.0"
 PUERTO_WEBSOCKET = 8765
 
-# Clientes conectados mediante WebSockets
-clientes = set()
+# Relaciona cada cliente WebSocket con el pedido al que está suscrito.
+clientes = {}
 loop_websocket = None
 servidor_listo = threading.Event()
 
 
 async def manejar_cliente(websocket):
-    clientes.add(websocket)
-    print(f"[NOTIFICACIONES] Cliente conectado. Total: {len(clientes)}")
+    pedido_id = None
+
+    print("[NOTIFICACIONES] Cliente WebSocket conectado.")
 
     try:
-        await websocket.wait_closed()
+        async for mensaje in websocket:
+            try:
+                datos = json.loads(mensaje)
+
+                if datos.get("tipo") == "suscribir":
+                    pedido_id = datos.get("pedido_id")
+
+                    if not pedido_id:
+                        await websocket.send(json.dumps({
+                            "tipo": "error",
+                            "mensaje": "Debes proporcionar un identificador de pedido."
+                        }))
+                        continue
+
+                    clientes[websocket] = pedido_id
+
+                    await websocket.send(json.dumps({
+                        "tipo": "suscripcion_exitosa",
+                        "pedido_id": pedido_id,
+                        "mensaje": f"Suscrito a las notificaciones del pedido {pedido_id}."
+                    }))
+
+                    print(
+                        f"[NOTIFICACIONES] Cliente suscrito al pedido {pedido_id}."
+                    )
+
+            except json.JSONDecodeError:
+                await websocket.send(json.dumps({
+                    "tipo": "error",
+                    "mensaje": "Mensaje JSON no válido."
+                }))
+
+    except Exception as e:
+        print(f"[NOTIFICACIONES] Error con cliente: {e}")
+
     finally:
-        clientes.discard(websocket)
-        print(f"[NOTIFICACIONES] Cliente desconectado. Total: {len(clientes)}")
+        clientes.pop(websocket, None)
+        print("[NOTIFICACIONES] Cliente desconectado.")
 
 
 async def iniciar_servidor_websocket():
@@ -37,23 +73,40 @@ async def iniciar_servidor_websocket():
     loop_websocket = asyncio.get_running_loop()
 
     async with serve(manejar_cliente, HOST, PUERTO_WEBSOCKET):
-        print(f"[NOTIFICACIONES] WebSocket activo en puerto {PUERTO_WEBSOCKET}.")
+        print(
+            f"[NOTIFICACIONES] WebSocket activo en puerto {PUERTO_WEBSOCKET}."
+        )
         servidor_listo.set()
         await asyncio.Future()
 
 
 async def enviar_notificacion(evento):
-    notificacion = json.dumps(evento, ensure_ascii=False)
-    conectados = list(clientes)
+    pedido_id = evento.get("id") or evento.get("id_pedido")
+
+    notificacion = {
+        "tipo": "pedido_listo",
+        "pedido_id": pedido_id,
+        "estado": evento.get("estado", "LISTO"),
+        "mensaje": f"Tu pedido {pedido_id} está listo."
+    }
+
+    mensaje_json = json.dumps(notificacion, ensure_ascii=False)
+
+    conectados = [
+        cliente
+        for cliente, pedido_suscrito in list(clientes.items())
+        if pedido_suscrito == pedido_id
+    ]
+
     enviados = 0
 
     for cliente in conectados:
         try:
-            await cliente.send(notificacion)
+            await cliente.send(mensaje_json)
             enviados += 1
         except Exception as e:
             print(f"[NOTIFICACIONES] Error enviando mensaje: {e}")
-            clientes.discard(cliente)
+            clientes.pop(cliente, None)
 
     return enviados
 
@@ -87,18 +140,13 @@ def escuchar_pedidos_listos():
                         pedido_id = evento.get("id") or evento.get("id_pedido")
 
                         if not pedido_id:
-                            print("[NOTIFICACIONES] Evento sin identificador.")
+                            print(
+                                "[NOTIFICACIONES] Evento sin identificador."
+                            )
                             continue
 
-                        notificacion = {
-                            "tipo": "pedido_listo",
-                            "pedido_id": pedido_id,
-                            "estado": evento.get("estado", "LISTO"),
-                            "mensaje": f"Tu pedido {pedido_id} está listo."
-                        }
-
                         futuro = asyncio.run_coroutine_threadsafe(
-                            enviar_notificacion(notificacion),
+                            enviar_notificacion(evento),
                             loop_websocket
                         )
 
@@ -106,7 +154,9 @@ def escuchar_pedidos_listos():
 
                         print("-" * 45)
                         print(f"[NOTIFICACIONES] Pedido listo: {pedido_id}")
-                        print(f"[NOTIFICACIONES] Clientes notificados: {enviados}")
+                        print(
+                            f"[NOTIFICACIONES] Clientes notificados: {enviados}"
+                        )
                         print("-" * 45)
 
                 if mensajes:

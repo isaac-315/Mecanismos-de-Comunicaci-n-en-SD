@@ -1,1 +1,116 @@
-<p>admin works!</p>
+
+<div class="admin-container">
+
+  <header class="admin-header">
+    <div>
+      <span class="admin-label">CAMPUSBITE</span>
+      <h1>Panel de administración</h1>
+      <p>Resumen general de pedidos y ventas del restaurante.</p>
+    </div>
+
+    <button
+      class="refresh-button"
+      (click)="cargarEstadisticas()"
+      [disabled]="cargando">
+      {{ cargando ? 'Actualizando...' : '↻ Actualizar' }}
+    </button>
+  </header>
+
+  <div class="update-info" *ngIf="ultimaActualizacion">
+    Última actualización:
+    {{ ultimaActualizacion | date:'dd/MM/yyyy HH:mm:ss' }}
+  </div>
+
+  <div class="error-message" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="loading-message" *ngIf="cargando && !estadisticas">
+    Cargando estadísticas...
+  </div>
+
+  <ng-container *ngIf="estadisticas as datos">
+
+    <section class="stats-grid">
+
+      <article class="stat-card">
+        <div class="stat-icon pedidos-icon">📦</div>
+        <div>
+          <p>Pedidos procesados</p>
+          <h2>{{ datos.pedidos_procesados }}</h2>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon ventas-icon">💰</div>
+        <div>
+          <p>Ventas totales</p>
+          <h2>{{ datos.ventas_totales | currency:'USD' }}</h2>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon unidades-icon">🛒</div>
+        <div>
+          <p>Unidades vendidas</p>
+          <h2>{{ datos.unidades_vendidas }}</h2>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon productos-icon">🍔</div>
+        <div>
+          <p>Productos registrados</p>
+          <h2>{{ productosRegistrados }}</h2>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="products-section">
+      <div class="section-header">
+        <div>
+          <h2>Ventas por producto</h2>
+          <p>Detalle de las ventas registradas por producto.</p>
+        </div>
+      </div>
+
+      <div class="empty-message" *ngIf="productosOrdenados.length === 0">
+        Todavía no existen ventas registradas.
+      </div>
+
+      <div class="table-container" *ngIf="productosOrdenados.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Unidades vendidas</th>
+              <th>Ventas</th>
+              <th>Comparación</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let producto of productosOrdenados">
+              <td class="product-name">{{ producto[0] }}</td>
+              <td>{{ producto[1].cantidad }}</td>
+              <td class="product-sales">
+                {{ producto[1].ventas | currency:'USD' }}
+              </td>
+              <td>
+                <div class="progress-container">
+                  <div
+                    class="progress-bar"
+                    [style.width.%]="porcentajeVentas(producto[1].ventas)">
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

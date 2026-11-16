@@ -1,6 +1,20 @@
 
-import { Component } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
+
+import {
+  NotificacionesService,
+  Notificacion
+} from '../../services/notificaciones.service';
 
 interface Producto {
   id: number;
@@ -18,7 +32,19 @@ interface Producto {
   templateUrl: './estudiante.html',
   styleUrl: './estudiante.css'
 })
-export class Estudiante {
+export class Estudiante implements OnInit, OnDestroy {
+
+  private http = inject(HttpClient);
+  private notificaciones = inject(NotificacionesService);
+  private cdr = inject(ChangeDetectorRef);
+
+  private suscripcionNotificaciones: Subscription | null = null;
+
+  estudiante = 'Estudiante Demo';
+  enviandoPedido = false;
+  mensaje = '';
+  pedidoId = '';
+  estadoPedido = '';
 
   categoriaSeleccionada = 'Todos';
 
@@ -77,6 +103,44 @@ export class Estudiante {
 
   carrito: { producto: Producto; cantidad: number }[] = [];
 
+  ngOnInit(): void {
+    // Escuchar las notificaciones del WebSocket.
+    this.suscripcionNotificaciones =
+      this.notificaciones.notificaciones$.subscribe(
+        (notificacion: Notificacion) => {
+
+          // Ignorar mensajes que no correspondan al pedido actual.
+          if (notificacion.pedido_id !== this.pedidoId) {
+            return;
+          }
+
+          if (notificacion.tipo === 'suscripcion_exitosa') {
+            this.estadoPedido =
+              'Seguimiento activado. Te avisaremos cuando esté listo.';
+          }
+
+          if (notificacion.tipo === 'pedido_listo') {
+            this.estadoPedido = '¡Tu pedido está listo! 🍔';
+
+            this.mensaje =
+              notificacion.mensaje || 'Puedes retirar tu pedido.';
+          }
+
+          if (notificacion.tipo === 'error') {
+            this.estadoPedido =
+              notificacion.mensaje || 'Error en el seguimiento.';
+          }
+
+          this.cdr.markForCheck();
+        }
+      );
+  }
+
+  ngOnDestroy(): void {
+    this.suscripcionNotificaciones?.unsubscribe();
+    this.notificaciones.desconectar();
+  }
+
   get productosFiltrados() {
     if (this.categoriaSeleccionada === 'Todos') {
       return this.productos;
@@ -134,7 +198,64 @@ export class Estudiante {
   }
 
   confirmarPedido() {
-    alert('¡Demostración! Próximamente conectaremos este pedido con la API REST.');
+
+    if (this.carrito.length === 0 || this.enviandoPedido) {
+      return;
+    }
+
+    this.enviandoPedido = true;
+    this.mensaje = '';
+    this.estadoPedido = '';
+
+    const pedido = {
+      estudiante: this.estudiante,
+      items: this.carrito.map(item => ({
+        nombre: item.producto.nombre,
+        cantidad: item.cantidad,
+        precio: item.producto.precio
+      })),
+      total: this.totalCarrito
+    };
+
+    const headers = new HttpHeaders({
+      'Idempotency-Key': crypto.randomUUID()
+    });
+
+    this.http.post<any>(
+      'http://localhost:5000/pedidos',
+      pedido,
+      { headers }
+    ).subscribe({
+      next: (respuesta) => {
+
+        this.pedidoId = respuesta.pedido.id;
+
+        this.mensaje =
+          `¡Pedido ${this.pedidoId} enviado correctamente!`;
+
+        this.estadoPedido =
+          'Conectando con el sistema de seguimiento...';
+
+        this.carrito = [];
+        this.enviandoPedido = false;
+
+        // Conectar al WebSocket y suscribirse al pedido creado.
+        this.notificaciones.conectar(this.pedidoId);
+
+        this.cdr.markForCheck();
+      },
+
+      error: (error) => {
+        console.error('Error al enviar pedido:', error);
+
+        this.mensaje =
+          'No se pudo enviar el pedido. Verifica que el backend esté activo.';
+
+        this.enviandoPedido = false;
+
+        this.cdr.markForCheck();
+      }
+    });
   }
 }
 

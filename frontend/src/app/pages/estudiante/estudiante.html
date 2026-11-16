@@ -92,12 +92,22 @@
 
     <button
       class="checkout-button"
-      [disabled]="carrito.length === 0"
+      [disabled]="carrito.length === 0 || enviandoPedido"
       (click)="confirmarPedido()">
-      Confirmar pedido →
+
+      {{ enviandoPedido ? 'Enviando pedido...' : 'Confirmar pedido →' }}
+      
     </button>
 
     <p class="cart-note">🔒 Tu pedido estará listo para seguimiento.</p>
+
+    <p *ngIf="mensaje" class="cart-note">
+      {{ mensaje }}
+    </p>
+
+    <p *ngIf="estadoPedido" class="cart-note">
+      🔔 {{ estadoPedido }}
+    </p>
 
   </aside>
 
