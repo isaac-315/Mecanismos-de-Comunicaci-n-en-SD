@@ -1,4 +1,4 @@
-# CampusBite 🍔
+# CampusBite
 
 Sistema distribuido de pedidos para la cafetería del campus. Permite a los estudiantes realizar pedidos desde una aplicación web, a cocina gestionar su preparación y a administración consultar estadísticas de ventas.
 
