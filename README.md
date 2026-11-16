@@ -136,3 +136,6 @@ La carpeta `docs` contiene la documentación del proyecto:
 - Registros de decisiones arquitectónicas (ADR).
 - Pruebas de comportamiento.
 - Bitácora de uso de inteligencia artificial.
+
+## 10. Link del vídeo
+https://www.youtube.com/watch?v=U3_duT5znyI
