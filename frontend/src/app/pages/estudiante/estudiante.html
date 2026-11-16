@@ -1,0 +1,105 @@
+
+<div class="welcome">
+  <div>
+    <span class="eyebrow">CAMPUSBITE · ESTUDIANTE</span>
+    <h1>¡Hola! ¿Qué se te antoja hoy? 👋</h1>
+    <p>Descubre nuestro menú y disfruta de tu comida favorita.</p>
+  </div>
+  <div class="welcome-icon">🍔</div>
+</div>
+
+<div class="content-layout">
+
+  <section class="menu-section">
+
+    <div class="section-heading">
+      <div>
+        <h2>Nuestro menú</h2>
+        <p>Encuentra algo delicioso para hoy</p>
+      </div>
+      <span class="product-count">{{ productosFiltrados.length }} productos</span>
+    </div>
+
+    <div class="categories">
+      <button
+        *ngFor="let categoria of categorias"
+        [class.selected]="categoriaSeleccionada === categoria"
+        (click)="seleccionarCategoria(categoria)">
+        {{ categoria }}
+      </button>
+    </div>
+
+    <div class="products-grid">
+      <article class="product-card" *ngFor="let producto of productosFiltrados">
+
+        <img [src]="producto.imagen" [alt]="producto.nombre">
+
+        <div class="product-info">
+          <span class="product-category">{{ producto.categoria }}</span>
+          <h3>{{ producto.nombre }}</h3>
+          <p>{{ producto.descripcion }}</p>
+
+          <div class="product-bottom">
+            <strong>${{ producto.precio.toFixed(2) }}</strong>
+
+            <button
+              class="add-button"
+              (click)="agregarAlCarrito(producto)">
+              + Agregar
+            </button>
+          </div>
+        </div>
+
+      </article>
+    </div>
+
+  </section>
+
+  <aside class="cart-section">
+
+    <div class="cart-heading">
+      <h2>🛒 Mi carrito</h2>
+      <span>{{ cantidadProductos }} productos</span>
+    </div>
+
+    <div class="empty-cart" *ngIf="carrito.length === 0">
+      <span>🛍️</span>
+      <h3>Tu carrito está vacío</h3>
+      <p>Agrega algo delicioso del menú.</p>
+    </div>
+
+    <div class="cart-items" *ngIf="carrito.length > 0">
+
+      <div class="cart-item" *ngFor="let item of carrito">
+        <div class="cart-item-info">
+          <strong>{{ item.producto.nombre }}</strong>
+          <small>${{ item.producto.precio.toFixed(2) }}</small>
+        </div>
+
+        <div class="quantity-controls">
+          <button (click)="cambiarCantidad(item.producto.id, -1)">−</button>
+          <span>{{ item.cantidad }}</span>
+          <button (click)="cambiarCantidad(item.producto.id, 1)">+</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="cart-total">
+      <span>Total a pagar</span>
+      <strong>${{ totalCarrito.toFixed(2) }}</strong>
+    </div>
+
+    <button
+      class="checkout-button"
+      [disabled]="carrito.length === 0"
+      (click)="confirmarPedido()">
+      Confirmar pedido →
+    </button>
+
+    <p class="cart-note">🔒 Tu pedido estará listo para seguimiento.</p>
+
+  </aside>
+
+</div>
+
